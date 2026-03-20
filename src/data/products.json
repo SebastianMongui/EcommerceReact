@@ -3,7 +3,8 @@
     "id": 1,
     "name": "AudioPro X5",
     "description": "Auriculares inalámbricos con cancelación de ruido",
-    "price": "$299.000"
+    "price": "$299.000",
+    "image" : "https://musicbox.com.co/wp-content/uploads/2022/06/6024172-A-1.jpg"
   },
   {
     "id": 2,

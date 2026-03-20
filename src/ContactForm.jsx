@@ -1,4 +1,3 @@
-// src/ContactForm.jsx
 import { useState } from 'react'
 
 export function ContactForm() {
@@ -42,7 +41,7 @@ export function ContactForm() {
     }
     setSubmitted(true)
   }
-
+  
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
