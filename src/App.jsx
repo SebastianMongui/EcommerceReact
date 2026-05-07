@@ -1,25 +1,47 @@
-// Importacion de Componentes y datos.
-import { useState } from 'react'
+/**
+ * Realizamos las importaciones de los componentes y recursos a usar.
+ */
+import { useState, useEffect } from 'react'
+import { useLocalStorage } from './hooks/useLocalStorage'
 import { ProductCard } from "./ProductCard"
 import { ProductDetail } from './ProductDetail'
 import { ContactForm } from './ContactForm'
+import { ProductFilters } from './ProductFilter'
+import { CheckoutForm } from './CheckoutForm'
+import { Comparator } from './Comparator'
 import products from './data/products.json'
 
+// FUNCION PRINCIPAL.
 export default function App() {
-  // Creacion de Hooks
-  const [cartItems, setCartItems] = useState([]) // Creado para manejar el carrito de compras.
+  // Uso de Hooks (Estados).
+  const [cartItems, setCartItems] = useLocalStorage('techstore-cart', [])
   const [currentPage, setCurrentPage] = useState('home')
-  const [selectedProduct, setSelectedProduct] = useState(null) // Usado para tener la informacion del producto a mostrar.
-  // Este metodo realiza una actualizacion inteligente al valor de cartItems.
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [activeFilter, setActiveFilter] = useState('all')
+  /**
+   * Uso de UseEffect para ajustar el nombre de la pagina.
+   */
+  useEffect(() => {
+    const titles = {
+      home: 'TechStore — Inicio',
+      store: 'TechStore — Tienda',
+      detail: selectedProduct ? `TechStore — ${selectedProduct.name}` : 'TechStore',
+      contact: 'TechStore — Contacto',
+      checkout: 'TechStore — Checkout',
+      comparator: 'TechStore — Comparar productos',
+    }
+    document.title = titles[currentPage] ?? 'TechStore'
+  }, [currentPage, selectedProduct])
+
   const handleAddCart = (product) => {
     setCartItems((prev) => [...prev, product])
   }
-  // Metodo creado para actualizar el valor del hook selectedProduct y al mismo tiempo el de currentPage (para actualizar el DOM)
+
   const handleViewDetail = (product) => {
     setSelectedProduct(product)
-    setCurrentPage('detail') // Actualizamos el hook currentPage y asi llamamos a otro componente.
+    setCurrentPage('detail')
   }
-  // Metodo usado para dejar en null un estado y forzar la actualizacion del DOM.
+
   const handleBack = () => {
     setSelectedProduct(null)
     setCurrentPage('store')
@@ -27,14 +49,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      {/* Header*/}
       <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex justify-between items-center">
-        {/*/ Se hace una actualizacion al estado de currentPage */}
         <h1 onClick={() => setCurrentPage('home')} className="text-2xl font-bold text-cyan-400 cursor-pointer">
           TechStore
         </h1>
         <nav className="flex items-center gap-6">
-          {/* Nuevamente la actualizacion a currentPage, condicionamos los estilos dependiendo del estado de la misma*/}
           <button onClick={() => setCurrentPage('home')} className={`text-sm transition-colors ${currentPage === 'home' ? 'text-cyan-400' : 'text-gray-400 hover:text-white'}`}>
             Inicio
           </button>
@@ -44,16 +63,19 @@ export default function App() {
           <button onClick={() => setCurrentPage('contact')} className={`text-sm transition-colors ${currentPage === 'contact' ? 'text-cyan-400' : 'text-gray-400 hover:text-white'}`}>
             Contacto
           </button>
-          <span className="text-gray-300 text-sm">
-            {/* Uso de .lenght para contar los productos y manejar la forma en que se muestra. */}
+          <button onClick={() => setCurrentPage('checkout')} className="text-gray-300 text-sm hover:text-cyan-400 transition-colors">
             🛒 {cartItems.length} producto{cartItems.length !== 1 ? 's' : ''}
-          </span>
+          </button>
+          <button
+            onClick={() => setCurrentPage('comparator')}
+            className={`text-sm transition-colors ${currentPage === 'comparator' ? 'text-cyan-400' : 'text-gray-400 hover:text-white'}`}
+          >
+            Comparar
+          </button>
         </nav>
       </header>
 
       <main className="flex-1">
-        {/* En este bloque comparamos el valor actual de currentPage para el manejo visual y la creacion/llamado de componentes  */}
-        {/* Home */}
         {currentPage === 'home' && (
           <div className="flex flex-col items-center justify-center text-center px-6 py-24 gap-6">
             <span className="bg-gray-800 text-cyan-400 text-xs font-medium px-4 py-2 rounded-full">
@@ -65,7 +87,6 @@ export default function App() {
             <p className="text-gray-400 text-lg max-w-md">
               Selección de tecnología de calidad. Envío gratis desde $200.000.
             </p>
-            {/* Creacion de botones para cambiar el estado del hook y manejar la vista actual. */}
             <button onClick={() => setCurrentPage('store')} className="bg-cyan-500 hover:bg-cyan-400 active:scale-95 text-gray-950 font-semibold px-8 py-3 rounded-xl transition-all">
               Ver productos →
             </button>
@@ -85,32 +106,98 @@ export default function App() {
             </div>
           </div>
         )}
-        {/* Recorremos el arreglo del producto importado y por cada uno llamamos el componente ProductCard
-            onAddCart y onViewDetail son prop y les enviamos funciones declarades aca.
-        */}
-        {/* Tienda */}
+
         {currentPage === 'store' && (
-          <div className="max-w-5xl mx-auto px-6 py-10">
-            <h2 className="text-xl font-semibold mb-6">Productos</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard
+    <div className="max-w-6xl mx-auto px-6 py-10">
+    <h2 className="text-xl font-semibold mb-6">Productos</h2>
+
+    <ProductFilters
+      activeFilter={activeFilter}
+      onFilterChange={setActiveFilter}
+    />
+
+    <div className="flex gap-6">
+
+      {/* Lista de productos — zona de arrastre */}
+      <div className="flex-1">
+        {(() => {
+          const filtered = activeFilter === 'all'
+            ? products
+            : products.filter((p) => p.category === activeFilter)
+
+          return filtered.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {filtered.map((product) => (
+                <div
                   key={product.id}
-                  name={product.name}
-                  description={product.description}
-                  price={product.price}
-                  image={product.image}
-                  onAddCart={() => handleAddCart(product)}
-                  onViewDetail={() => handleViewDetail(product)}
-                />
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData('productId', product.id)}
+                  className="cursor-grab active:cursor-grabbing active:opacity-60 transition-opacity"
+                >
+                  <ProductCard
+                    name={product.name}
+                    description={product.description}
+                    price={product.price}
+                    image={product.image}
+                    onAddCart={() => handleAddCart(product)}
+                    onViewDetail={() => handleViewDetail(product)}
+                  />
+                </div>
               ))}
             </div>
-          </div>
-        )}
-        {/* Creamos un nuevo componente a partir del valor de currentPage y del selectedProduct
-            Pasamos como props dos funciones
-            */}
-        {/* Detalle del producto */}
+          ) : (
+            <div className="text-center py-20 text-gray-500">
+              <p className="text-4xl mb-3">📭</p>
+              <p className="text-lg">No hay productos en esta categoría.</p>
+            </div>
+          )
+        })()}
+      </div>
+
+      {/* Zona de soltar — carrito visual */}
+      <div
+        className="w-72 shrink-0"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          const id = parseInt(e.dataTransfer.getData('productId'))
+          const product = products.find((p) => p.id === id)
+          if (product) handleAddCart(product)
+        }}
+      >
+        <div className="bg-gray-900 border-2 border-dashed border-gray-700 rounded-xl p-4 min-h-64 sticky top-4">
+          <p className="text-gray-400 text-sm font-medium mb-4 text-center">
+            🛒 Suelta aquí para agregar
+          </p>
+          {cartItems.length === 0 ? (
+            <p className="text-gray-600 text-xs text-center mt-8">
+              Tu carrito está vacío
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {cartItems.map((item, index) => (
+                <div key={index} className="flex items-center gap-2 bg-gray-800 rounded-lg p-2">
+                  <img src={item.image} alt={item.name} className="w-8 h-8 object-cover rounded" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium truncate">{item.name}</p>
+                    <p className="text-cyan-400 text-xs">{item.price}</p>
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() => setCurrentPage('checkout')}
+                className="mt-2 w-full bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold py-2 rounded-lg text-sm transition-all"
+              >
+                Comprar →
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
+
         {currentPage === 'detail' && selectedProduct && (
           <ProductDetail
             product={selectedProduct}
@@ -119,7 +206,6 @@ export default function App() {
           />
         )}
 
-        {/* Contacto */}
         {currentPage === 'contact' && (
           <div className="flex flex-col items-center py-10 px-6">
             <div className="w-full max-w-lg bg-gray-900 border border-gray-800 rounded-2xl p-8">
@@ -128,9 +214,27 @@ export default function App() {
           </div>
         )}
 
+        {currentPage === 'checkout' && (
+          <div className="flex flex-col items-center py-10 px-6">
+            <div className="w-full max-w-lg bg-gray-900 border border-gray-800 rounded-2xl p-8">
+              <CheckoutForm
+                cartItems={cartItems}
+                onSuccess={() => {
+                  setCartItems([])
+                  setCurrentPage('home')
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {currentPage === 'comparator' && (
+          <div className="max-w-4xl mx-auto px-6 py-10">
+            <Comparator products={products} />
+          </div>
+        )}
       </main>
 
-      {/* Footer */}
       <footer className="bg-gray-900 border-t border-gray-800 px-6 py-8">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-cyan-400 font-bold text-lg">TechStore</p>
@@ -142,7 +246,6 @@ export default function App() {
           <p className="text-gray-600 text-xs">© 2025 TechStore. Todos los derechos reservados.</p>
         </div>
       </footer>
-
     </div>
   )
 }

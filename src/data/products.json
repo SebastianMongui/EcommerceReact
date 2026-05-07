@@ -2,20 +2,49 @@
   {
     "id": 1,
     "name": "AudioPro X5",
-    "description": "Auriculares inalámbricos con cancelación de ruido",
+    "description": "Auriculares inalámbricos con cancelación de ruido activa y 30h de batería.",
     "price": "$299.000",
-    "image" : "https://musicbox.com.co/wp-content/uploads/2022/06/6024172-A-1.jpg"
+    "category": "accesorios",
+    "image": "https://musicbox.com.co/wp-content/uploads/2022/06/6024172-A-1.jpg"
   },
   {
     "id": 2,
     "name": "SmartWatch Z3",
-    "description": "Reloj inteligente con GPS y monitor de salud",
-    "price": "$459.000"
+    "description": "Reloj inteligente con GPS, monitor de salud y resistencia al agua.",
+    "price": "$459.000",
+    "category": "wearables",
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400"
   },
   {
     "id": 3,
     "name": "TabletPad Pro",
-    "description": "Tableta profesional con pantalla 2K y stylus",
-    "price": "$1.290.000"
+    "description": "Tableta profesional con pantalla 2K, stylus incluido y 256GB.",
+    "price": "$1.290.000",
+    "category": "tablets",
+    "image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400"
+  },
+  {
+    "id": 4,
+    "name": "PhoneMax Ultra",
+    "description": "Smartphone flagship con cámara de 200MP y batería de 5000mAh.",
+    "price": "$3.200.000",
+    "category": "phones",
+    "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400"
+  },
+  {
+    "id": 5,
+    "name": "LapBook Air",
+    "description": "Portátil ultradelgado con procesador M3 y 18h de autonomía.",
+    "price": "$4.800.000",
+    "category": "laptops",
+    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400"
+  },
+  {
+    "id": 6,
+    "name": "BudsPro Lite",
+    "description": "Audífonos in-ear con cancelación de ruido y estuche de carga.",
+    "price": "$189.000",
+    "category": "accesorios",
+    "image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400"
   }
 ]
